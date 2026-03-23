@@ -100,10 +100,7 @@ spec:
     spec:
       containers:
         - name: claude
-          # Build from k8s/Dockerfile and push to your registry, e.g.:
-          #   docker build -t your-registry/claude-server:latest k8s/
-          #   docker push your-registry/claude-server:latest
-          image: your-registry/claude-server:latest
+          image: ghcr.io/n1mmy/claude-server:latest
           imagePullPolicy: Always
 
           ports:

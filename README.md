@@ -71,12 +71,14 @@ ssh ubuntu@<host>
 
 #### 1. Build and push the image
 
+The manifest defaults to `ghcr.io/n1mmy/claude-server:latest`. To use a custom image:
+
 ```sh
 docker build -t your-registry/claude-server:latest .
 docker push your-registry/claude-server:latest
 ```
 
-Update `image:` in `manifests.yaml` to match.
+Then update `image:` in `k8s-manifest.yaml` to match.
 
 #### 2. Set your SSH public key
 
