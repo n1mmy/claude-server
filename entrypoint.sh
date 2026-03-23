@@ -10,17 +10,17 @@ fi
 
 # Install authorized keys from mounted secret
 if [ -f /etc/ssh/authorized_keys/authorized_keys ]; then
-    cp /etc/ssh/authorized_keys/authorized_keys /home/claude/.ssh/authorized_keys
-    chown claude:claude /home/claude/.ssh/authorized_keys
-    chmod 600 /home/claude/.ssh/authorized_keys
+    cp /etc/ssh/authorized_keys/authorized_keys /home/ubuntu/.ssh/authorized_keys
+    chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
+    chmod 600 /home/ubuntu/.ssh/authorized_keys
 else
     echo "WARNING: No authorized_keys found at /etc/ssh/authorized_keys/authorized_keys"
 fi
 
-# Write ANTHROPIC_API_KEY into claude's environment so SSH sessions pick it up
+# Write ANTHROPIC_API_KEY into ubuntu's environment so SSH sessions pick it up
 if [ -n "$ANTHROPIC_API_KEY" ]; then
-    echo "export ANTHROPIC_API_KEY='$ANTHROPIC_API_KEY'" >> /home/claude/.bashrc
-    echo "export ANTHROPIC_API_KEY='$ANTHROPIC_API_KEY'" >> /home/claude/.profile
+    echo "export ANTHROPIC_API_KEY='$ANTHROPIC_API_KEY'" >> /home/ubuntu/.bashrc
+    echo "export ANTHROPIC_API_KEY='$ANTHROPIC_API_KEY'" >> /home/ubuntu/.profile
 fi
 
 echo "SSH server starting..."
