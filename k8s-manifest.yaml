@@ -1,0 +1,219 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: claude-workspace
+
+---
+# Secret: user's SSH public key
+# Replace the value below with your public key (base64-encoded)
+# Generate with: cat ~/.ssh/id_ed25519.pub | base64
+# Then apply: kubectl apply -f manifests.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ssh-authorized-keys
+  namespace: claude-workspace
+type: Opaque
+data:
+  # echo -n "ssh-ed25519 AAAA... user@host" | base64
+  authorized_keys: REPLACE_WITH_BASE64_ENCODED_PUBLIC_KEY
+
+---
+# Secret: Anthropic API key
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anthropic-credentials
+  namespace: claude-workspace
+type: Opaque
+stringData:
+  # Set your API key here or use: kubectl create secret generic anthropic-credentials
+  # --from-literal=api-key=sk-ant-... -n claude-workspace
+  api-key: REPLACE_WITH_ANTHROPIC_API_KEY
+
+---
+# PVC: project workspace (code, configs)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: workspace-pvc
+  namespace: claude-workspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  # storageClassName: standard  # uncomment and set if needed
+
+---
+# PVC: video data (large, for training clips)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-pvc
+  namespace: claude-workspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Gi
+  # storageClassName: standard  # uncomment and set if needed
+
+---
+# PVC: model checkpoints
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: models-pvc
+  namespace: claude-workspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+# Deployment: Claude Code SSH server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claude-server
+  namespace: claude-workspace
+  labels:
+    app: claude-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: claude-server
+  strategy:
+    type: Recreate  # Required: volumes are ReadWriteOnce
+  template:
+    metadata:
+      labels:
+        app: claude-server
+    spec:
+      containers:
+        - name: claude
+          # Build from k8s/Dockerfile and push to your registry, e.g.:
+          #   docker build -t your-registry/claude-server:latest k8s/
+          #   docker push your-registry/claude-server:latest
+          image: your-registry/claude-server:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 22
+              name: ssh
+
+          env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: anthropic-credentials
+                  key: api-key
+
+          volumeMounts:
+            # SSH authorized keys (read-only, mounted from secret)
+            - name: ssh-authorized-keys
+              mountPath: /etc/ssh/authorized_keys
+              readOnly: true
+
+            # SSH host keys (persistent so client known_hosts don't break on pod restart)
+            - name: ssh-host-keys
+              mountPath: /etc/ssh/host-keys
+
+            # Project workspace
+            - name: workspace
+              mountPath: /home/claude/workspace
+
+            # Video data
+            - name: data
+              mountPath: /home/claude/data
+
+            # Model checkpoints
+            - name: models
+              mountPath: /home/claude/models
+
+          resources:
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+            limits:
+              cpu: "8"
+              memory: "16Gi"
+              # Uncomment for GPU nodes:
+              # nvidia.com/gpu: "1"
+
+          readinessProbe:
+            tcpSocket:
+              port: 22
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            tcpSocket:
+              port: 22
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+      volumes:
+        - name: ssh-authorized-keys
+          secret:
+            secretName: ssh-authorized-keys
+            defaultMode: 0600
+
+        # PVC for SSH host keys so they survive pod restarts
+        - name: ssh-host-keys
+          persistentVolumeClaim:
+            claimName: ssh-host-keys-pvc
+
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: workspace-pvc
+
+        - name: data
+          persistentVolumeClaim:
+            claimName: data-pvc
+
+        - name: models
+          persistentVolumeClaim:
+            claimName: models-pvc
+
+---
+# PVC: SSH host keys (small, keeps known_hosts stable across restarts)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ssh-host-keys-pvc
+  namespace: claude-workspace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Mi
+
+---
+# Service: expose SSH
+# Use LoadBalancer if your cluster supports it (cloud), or NodePort for bare metal.
+apiVersion: v1
+kind: Service
+metadata:
+  name: claude-ssh
+  namespace: claude-workspace
+  labels:
+    app: claude-server
+spec:
+  type: LoadBalancer  # Change to NodePort for bare metal, or ClusterIP + port-forward for local
+  selector:
+    app: claude-server
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: 22
+      # nodePort: 30022  # Uncomment for NodePort type

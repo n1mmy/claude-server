@@ -1,0 +1,52 @@
+FROM ubuntu:24.04
+
+ARG NODE_VERSION=22
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    openssh-server \
+    curl \
+    git \
+    ca-certificates \
+    sudo \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
+
+# Create claude user with sudo access
+RUN useradd -m -s /bin/bash claude \
+    && echo "claude ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# SSH configuration
+RUN mkdir /var/run/sshd \
+    && sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config \
+    && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config \
+    && sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config \
+    && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config \
+    && echo "AllowUsers claude" >> /etc/ssh/sshd_config \
+    && echo "HostKey /etc/ssh/host-keys/ssh_host_rsa_key" >> /etc/ssh/sshd_config \
+    && echo "HostKey /etc/ssh/host-keys/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config \
+    && echo "HostKey /etc/ssh/host-keys/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
+    && echo "AcceptEnv ANTHROPIC_API_KEY ANTHROPIC_BASE_URL" >> /etc/ssh/sshd_config
+
+# Set up claude user's home and SSH dir
+RUN mkdir -p /home/claude/.ssh \
+    && chown -R claude:claude /home/claude \
+    && chmod 700 /home/claude/.ssh
+
+# Entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 22
+
+ENTRYPOINT ["/entrypoint.sh"]
