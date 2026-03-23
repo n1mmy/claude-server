@@ -63,8 +63,6 @@ ssh ubuntu@<host>
 | Mount | PVC | Purpose |
 |---|---|---|
 | `/home/ubuntu/workspace` | `workspace-pvc` (10Gi) | Project code |
-| `/home/ubuntu/data` | `data-pvc` (500Gi) | Video training data |
-| `/home/ubuntu/models` | `models-pvc` (50Gi) | Model checkpoints |
 | `/etc/ssh/host-keys` | `ssh-host-keys-pvc` (1Mi) | Stable SSH host keys |
 
 ### Setup

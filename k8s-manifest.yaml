@@ -49,35 +49,6 @@ spec:
   # storageClassName: standard  # uncomment and set if needed
 
 ---
-# PVC: video data (large, for training clips)
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: data-pvc
-  namespace: claude-workspace
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 500Gi
-  # storageClassName: standard  # uncomment and set if needed
-
----
-# PVC: model checkpoints
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: models-pvc
-  namespace: claude-workspace
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 50Gi
-
----
 # Deployment: Claude Code SSH server
 apiVersion: apps/v1
 kind: Deployment
@@ -126,15 +97,7 @@ spec:
 
             # Project workspace
             - name: workspace
-              mountPath: /home/claude/workspace
-
-            # Video data
-            - name: data
-              mountPath: /home/claude/data
-
-            # Model checkpoints
-            - name: models
-              mountPath: /home/claude/models
+              mountPath: /home/ubuntu/workspace
 
           resources:
             requests:
@@ -172,14 +135,6 @@ spec:
         - name: workspace
           persistentVolumeClaim:
             claimName: workspace-pvc
-
-        - name: data
-          persistentVolumeClaim:
-            claimName: data-pvc
-
-        - name: models
-          persistentVolumeClaim:
-            claimName: models-pvc
 
 ---
 # PVC: SSH host keys (small, keeps known_hosts stable across restarts)
