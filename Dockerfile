@@ -2,6 +2,7 @@ ARG BASE_IMAGE=ubuntu:24.04
 FROM ${BASE_IMAGE}
 
 ARG NODE_VERSION=22
+ARG EXTRA_PACKAGES=""
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -13,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     sudo \
     python3 \
     python3-pip \
+    ${EXTRA_PACKAGES} \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js
