@@ -56,6 +56,26 @@ docker run -d \
 ssh ubuntu@<host>
 ```
 
+## Claude Desktop app and sandboxing
+
+The Claude Desktop app runs in a sandbox that may block outbound SSH connections. If the app cannot reach your server directly, use a local port forward so it connects via `localhost` instead.
+
+**SSH port forward:**
+
+```sh
+ssh -N -L 2222:<host>:22 ubuntu@<host>
+```
+
+Then point Claude Desktop at `localhost:2222`.
+
+**Persistent forward with autossh:**
+
+```sh
+autossh -M 0 -N -L 2222:<host>:22 ubuntu@<host>
+```
+
+`autossh` monitors the tunnel and restarts it if it drops. Install via `brew install autossh` on macOS.
+
 ## Kubernetes deployment
 
 ### Volumes
