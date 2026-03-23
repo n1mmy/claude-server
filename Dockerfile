@@ -44,6 +44,7 @@ RUN mkdir -p /home/ubuntu/.ssh \
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+ENV PORT=22
 EXPOSE 22
 
 ENTRYPOINT ["/entrypoint.sh"]

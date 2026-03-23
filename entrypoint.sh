@@ -24,4 +24,4 @@ if [ -n "$ANTHROPIC_API_KEY" ]; then
 fi
 
 echo "SSH server starting..."
-exec /usr/sbin/sshd -D -e
+exec /usr/sbin/sshd -D -e ${PORT:+-p $PORT}
