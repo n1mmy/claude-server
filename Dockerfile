@@ -47,7 +47,7 @@ RUN if [ "$ENABLE_SUDO" = "true" ]; then \
 
 # Set up ubuntu user's SSH dir
 RUN mkdir -p /home/ubuntu/.ssh \
-    && chown -R ubuntu:ubuntu /home/ubuntu \
+    && chown ubuntu:ubuntu /home/ubuntu/.ssh \
     && chmod 700 /home/ubuntu/.ssh
 
 # Entrypoint script
