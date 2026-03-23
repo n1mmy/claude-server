@@ -21,6 +21,8 @@ docker build -t claude-server .
 |---|---|---|
 | `BASE_IMAGE` | `ubuntu:24.04` | Base image to build from |
 | `NODE_VERSION` | `22` | Node.js major version to install |
+| `EXTRA_PACKAGES` | — | Space-separated extra apt packages to install |
+| `ENABLE_SUDO` | `false` | Grant the `ubuntu` user passwordless `sudo` (grants full root access — use with caution) |
 
 ```sh
 docker build --build-arg BASE_IMAGE=ubuntu:22.04 --build-arg NODE_VERSION=20 -t claude-server .
@@ -47,7 +49,7 @@ docker run -d \
 | Variable | Default | Description |
 |---|---|---|
 | `PORT` | `22` | Port sshd listens on |
-| `ANTHROPIC_API_KEY` | — | Injected into the `ubuntu` user's environment for Claude Code |
+| `ANTHROPIC_API_KEY` | — | Injected into the `ubuntu` user's environment for Claude Code (written to `.bashrc`/`.profile` in plaintext) |
 | `ANTHROPIC_BASE_URL` | — | Optional custom Anthropic API base URL (passed through via SSH `AcceptEnv`) |
 
 ### Connecting
@@ -117,7 +119,7 @@ kubectl create secret generic anthropic-credentials \
 #### 4. Deploy
 
 ```sh
-kubectl apply -f k8s/manifests.yaml
+kubectl apply -f k8s-manifest.yaml
 ```
 
 #### 5. Get the SSH address

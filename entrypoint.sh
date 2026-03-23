@@ -2,10 +2,25 @@
 set -e
 
 # Generate SSH host keys into the persistent volume if not already present
-if [ ! -f /etc/ssh/host-keys/ssh_host_ed25519_key ]; then
+if [ ! -f /etc/ssh/host-keys/.generated ]; then
     ssh-keygen -t rsa     -b 4096 -f /etc/ssh/host-keys/ssh_host_rsa_key     -N ""
     ssh-keygen -t ecdsa   -b 256  -f /etc/ssh/host-keys/ssh_host_ecdsa_key   -N ""
     ssh-keygen -t ed25519         -f /etc/ssh/host-keys/ssh_host_ed25519_key -N ""
+    touch /etc/ssh/host-keys/.generated
+fi
+
+# Validate PORT
+if [ -n "$PORT" ]; then
+    case "$PORT" in
+        ''|*[!0-9]*)
+            echo "ERROR: PORT must be a number (got: $PORT)" >&2
+            exit 1
+            ;;
+    esac
+    if [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
+        echo "ERROR: PORT must be between 1 and 65535 (got: $PORT)" >&2
+        exit 1
+    fi
 fi
 
 # Install authorized keys from mounted secret

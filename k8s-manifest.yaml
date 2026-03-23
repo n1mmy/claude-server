@@ -72,7 +72,7 @@ spec:
       containers:
         - name: claude
           image: ghcr.io/n1mmy/claude-server:main
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
 
           ports:
             - containerPort: 22
