@@ -46,7 +46,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  # storageClassName: standard  # uncomment and set if needed
+  # storageClassName: standard  # uncomment and set to match your cluster's storage class
 
 ---
 # Deployment: Claude Code SSH server
@@ -71,7 +71,7 @@ spec:
     spec:
       containers:
         - name: claude
-          image: ghcr.io/n1mmy/claude-server:latest
+          image: ghcr.io/n1mmy/claude-server:main
           imagePullPolicy: Always
 
           ports:
@@ -149,6 +149,7 @@ spec:
   resources:
     requests:
       storage: 1Mi
+  # storageClassName: standard  # uncomment and set to match your cluster's storage class
 
 ---
 # Service: expose SSH

@@ -69,7 +69,7 @@ ssh ubuntu@<host>
 
 #### 1. Build and push the image
 
-The manifest defaults to `ghcr.io/n1mmy/claude-server:latest`. To use a custom image:
+The manifest defaults to `ghcr.io/n1mmy/claude-server:main`. To use a custom image:
 
 ```sh
 docker build -t your-registry/claude-server:latest .
