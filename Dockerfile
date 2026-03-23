@@ -9,7 +9,7 @@ USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get -qq update > /dev/null && apt-get -qq -o=Dpkg::Use-Pty=0 install -y \
     openssh-server \
     curl \
     git \
@@ -18,11 +18,11 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     ${EXTRA_PACKAGES} \
-    && rm -rf /var/lib/apt/lists/*
+    > /dev/null && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
-    && apt-get install -y nodejs \
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - 2>/dev/null \
+    && apt-get -qq -o=Dpkg::Use-Pty=0 install -y nodejs > /dev/null \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Claude Code CLI
