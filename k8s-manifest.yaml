@@ -21,17 +21,21 @@ data:
   authorized_keys: REPLACE_WITH_BASE64_ENCODED_PUBLIC_KEY
 
 ---
-# Secret: Anthropic API key
+# Secret: AI provider API keys
 apiVersion: v1
 kind: Secret
 metadata:
-  name: anthropic-credentials
+  name: ai-credentials
   namespace: claude-workspace
 type: Opaque
 stringData:
-  # Set your API key here or use: kubectl create secret generic anthropic-credentials
-  # --from-literal=api-key=sk-ant-... -n claude-workspace
-  api-key: REPLACE_WITH_ANTHROPIC_API_KEY
+  # Set your API keys here or use:
+  # kubectl create secret generic ai-credentials \
+  #   --from-literal=anthropic-api-key=sk-ant-... \
+  #   --from-literal=openai-api-key=sk-... \
+  #   -n claude-workspace
+  anthropic-api-key: REPLACE_WITH_ANTHROPIC_API_KEY
+  openai-api-key: REPLACE_WITH_OPENAI_API_KEY
 
 ---
 # PVC: project workspace (code, configs)
@@ -49,29 +53,29 @@ spec:
   # storageClassName: standard  # uncomment and set to match your cluster's storage class
 
 ---
-# Deployment: Claude Code SSH server
+# Deployment: Agentic Coding SSH server
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: claude-server
+  name: agentic-coding-server
   namespace: claude-workspace
   labels:
-    app: claude-server
+    app: agentic-coding-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: claude-server
+      app: agentic-coding-server
   strategy:
     type: Recreate  # Required: volumes are ReadWriteOnce
   template:
     metadata:
       labels:
-        app: claude-server
+        app: agentic-coding-server
     spec:
       containers:
-        - name: claude
-          image: ghcr.io/n1mmy/claude-server:main
+        - name: agentic-coding
+          image: ghcr.io/n1mmy/agentic-coding-container:main
           imagePullPolicy: IfNotPresent
 
           ports:
@@ -82,8 +86,13 @@ spec:
             - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: anthropic-credentials
-                  key: api-key
+                  name: ai-credentials
+                  key: anthropic-api-key
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-credentials
+                  key: openai-api-key
 
           volumeMounts:
             # SSH authorized keys (read-only, mounted from secret)
@@ -157,14 +166,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: claude-ssh
+  name: agentic-coding-ssh
   namespace: claude-workspace
   labels:
-    app: claude-server
+    app: agentic-coding-server
 spec:
   type: LoadBalancer  # Change to NodePort for bare metal, or ClusterIP + port-forward for local
   selector:
-    app: claude-server
+    app: agentic-coding-server
   ports:
     - name: ssh
       port: 22

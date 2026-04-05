@@ -1,6 +1,8 @@
 # agentic-coding-container
 
-A Docker image that runs an SSH server with AI coding agents pre-installed, intended for use as a remote development environment. Ships with [Claude Code](https://github.com/anthropics/claude-code) and [OpenAI Codex](https://github.com/openai/codex) out of the box — either can be toggled off at build time.
+A Docker image that runs an SSH server with AI coding agents pre-installed, intended for use as a remote development environment. Compatible with the ssh feature of the Claude desktop app allowing for development on a remote machine, for example a kubernetes node with a GPU.
+
+Ships with [Claude Code](https://github.com/anthropics/claude-code) and [OpenAI Codex](https://github.com/openai/codex) out of the box — either can be toggled off at build time.
 
 ## What it does
 
@@ -138,14 +140,14 @@ kubectl apply -f k8s-manifest.yaml
 #### 5. Get the SSH address
 
 ```sh
-kubectl get svc claude-ssh -n claude-workspace
+kubectl get svc agentic-coding-ssh -n claude-workspace
 # Note the EXTERNAL-IP
 ```
 
 For local clusters without LoadBalancer:
 
 ```sh
-kubectl port-forward svc/claude-ssh 2222:22 -n claude-workspace
+kubectl port-forward svc/agentic-coding-ssh 2222:22 -n claude-workspace
 # Then SSH to localhost:2222
 ```
 
