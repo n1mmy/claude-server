@@ -23,6 +23,8 @@ docker build -t claude-server .
 | `NODE_VERSION` | `22` | Node.js major version to install |
 | `EXTRA_PACKAGES` | — | Space-separated extra apt packages to install |
 | `ENABLE_SUDO` | `false` | Grant the `ubuntu` user passwordless `sudo` (grants full root access — use with caution) |
+| `INSTALL_CLAUDE` | `true` | Install [Claude Code](https://github.com/anthropics/claude-code) CLI |
+| `INSTALL_CODEX` | `true` | Install [OpenAI Codex](https://github.com/openai/codex) CLI |
 
 ```sh
 docker build --build-arg BASE_IMAGE=ubuntu:22.04 --build-arg NODE_VERSION=20 -t claude-server .

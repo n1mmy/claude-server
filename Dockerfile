@@ -4,6 +4,8 @@ FROM ${BASE_IMAGE}
 ARG NODE_VERSION=22
 ARG EXTRA_PACKAGES=""
 ARG ENABLE_SUDO=false
+ARG INSTALL_CLAUDE=true
+ARG INSTALL_CODEX=true
 
 USER root
 
@@ -26,7 +28,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - 2>/de
     && rm -rf /var/lib/apt/lists/*
 
 # Install Claude Code CLI
-RUN npm install -g @anthropic-ai/claude-code
+RUN if [ "$INSTALL_CLAUDE" = "true" ]; then \
+        npm install -g @anthropic-ai/claude-code; \
+    fi
+
+# Install OpenAI Codex CLI
+RUN if [ "$INSTALL_CODEX" = "true" ]; then \
+        npm install -g @openai/codex; \
+    fi
 
 # SSH configuration
 RUN mkdir /var/run/sshd \
