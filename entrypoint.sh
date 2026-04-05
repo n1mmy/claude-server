@@ -32,10 +32,14 @@ else
     echo "WARNING: No authorized_keys found at /etc/ssh/authorized_keys/authorized_keys"
 fi
 
-# Write ANTHROPIC_API_KEY into ubuntu's environment so SSH sessions pick it up
+# Write API keys into ubuntu's environment so SSH sessions pick them up
 if [ -n "$ANTHROPIC_API_KEY" ]; then
     echo "export ANTHROPIC_API_KEY='$ANTHROPIC_API_KEY'" >> /home/ubuntu/.bashrc
     echo "export ANTHROPIC_API_KEY='$ANTHROPIC_API_KEY'" >> /home/ubuntu/.profile
+fi
+if [ -n "$OPENAI_API_KEY" ]; then
+    echo "export OPENAI_API_KEY='$OPENAI_API_KEY'" >> /home/ubuntu/.bashrc
+    echo "export OPENAI_API_KEY='$OPENAI_API_KEY'" >> /home/ubuntu/.profile
 fi
 
 echo "SSH server starting..."

@@ -21,7 +21,8 @@ docker build -t claude-server .
 |---|---|---|
 | `BASE_IMAGE` | `ubuntu:24.04` | Base image to build from |
 | `NODE_VERSION` | `22` | Node.js major version to install |
-| `EXTRA_PACKAGES` | — | Space-separated extra apt packages to install |
+| `EXTRA_APT_PACKAGES` | — | Space-separated extra apt packages to install |
+| `EXTRA_NPM_PACKAGES` | — | Space-separated extra global npm packages to install |
 | `ENABLE_SUDO` | `false` | Grant the `ubuntu` user passwordless `sudo` (grants full root access — use with caution) |
 | `INSTALL_CLAUDE` | `true` | Install [Claude Code](https://github.com/anthropics/claude-code) CLI |
 | `INSTALL_CODEX` | `true` | Install [OpenAI Codex](https://github.com/openai/codex) CLI |
@@ -53,6 +54,7 @@ docker run -d \
 | `PORT` | `22` | Port sshd listens on |
 | `ANTHROPIC_API_KEY` | — | Injected into the `ubuntu` user's environment for Claude Code (written to `.bashrc`/`.profile` in plaintext) |
 | `ANTHROPIC_BASE_URL` | — | Optional custom Anthropic API base URL (passed through via SSH `AcceptEnv`) |
+| `OPENAI_API_KEY` | — | Injected into the `ubuntu` user's environment for Codex CLI (written to `.bashrc`/`.profile` in plaintext) |
 
 ### Connecting
 

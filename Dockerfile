@@ -2,7 +2,8 @@ ARG BASE_IMAGE=ubuntu:24.04
 FROM ${BASE_IMAGE}
 
 ARG NODE_VERSION=22
-ARG EXTRA_PACKAGES=""
+ARG EXTRA_APT_PACKAGES=""
+ARG EXTRA_NPM_PACKAGES=""
 ARG ENABLE_SUDO=false
 ARG INSTALL_CLAUDE=true
 ARG INSTALL_CODEX=true
@@ -19,7 +20,7 @@ RUN apt-get -qq update > /dev/null && apt-get -qq -o=Dpkg::Use-Pty=0 install -y 
     sudo \
     python3 \
     python3-pip \
-    ${EXTRA_PACKAGES} \
+    ${EXTRA_APT_PACKAGES} \
     > /dev/null && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js
@@ -37,6 +38,11 @@ RUN if [ "$INSTALL_CODEX" = "true" ]; then \
         npm install -g @openai/codex; \
     fi
 
+# Install extra global npm packages
+RUN if [ -n "$EXTRA_NPM_PACKAGES" ]; then \
+        npm install -g $EXTRA_NPM_PACKAGES; \
+    fi
+
 # SSH configuration
 RUN mkdir /var/run/sshd \
     && sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config \
@@ -47,7 +53,7 @@ RUN mkdir /var/run/sshd \
     && echo "HostKey /etc/ssh/host-keys/ssh_host_rsa_key" >> /etc/ssh/sshd_config \
     && echo "HostKey /etc/ssh/host-keys/ssh_host_ecdsa_key" >> /etc/ssh/sshd_config \
     && echo "HostKey /etc/ssh/host-keys/ssh_host_ed25519_key" >> /etc/ssh/sshd_config \
-    && echo "AcceptEnv ANTHROPIC_API_KEY ANTHROPIC_BASE_URL" >> /etc/ssh/sshd_config
+    && echo "AcceptEnv ANTHROPIC_API_KEY ANTHROPIC_BASE_URL OPENAI_API_KEY" >> /etc/ssh/sshd_config
 
 # Grant passwordless sudo if enabled
 RUN if [ "$ENABLE_SUDO" = "true" ]; then \
